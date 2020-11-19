@@ -17,11 +17,9 @@ def subs_desc_slow(a, b):
     """Determinarea solutiei numerica"""
     x_num[n] = b[n] / a[n, n]
     for k in range(n - 1, -1, -1):
-        # TODO scapa de al doilea for
-        # s = 0
-        # for j in range(k + 1, n + 1, 1):
-        #     s += a[k, j] * x_num[j]
-        s = np.dot(a[k, k + 1:], x_num[k + 1:])
+        s = 0
+        for j in range(k + 1, n + 1, 1):
+            s += a[k, j] * x_num[j]
 
         x_num[k] = (b[k] - s) / a[k, k]
 
@@ -42,10 +40,6 @@ def subs_desc_fast(a, b):
     """ Determina solutia numerica. """
     x_num[n] = b[n] / a[n, n]
     for k in range(n - 1, -1, -1):
-        # TODO: scapa de al doilea for
-        # s = 0.
-        # for j in range(k+1,n+1,1):
-        #     s += a[k, j] * x_num[j]
         s = np.dot(a[k, k + 1:], x_num[k + 1:])
 
         x_num[k] = (b[k] - s) / a[k, k]
@@ -87,7 +81,7 @@ def meg_fara_pivot(a, b):
 
     """Gaseste solutia numerica folosind metoda substitutiei descendente"""
 
-    x_num = subs_desc_slow(a_ext[:, :-1], a_ext[:, -1])
+    x_num = subs_desc_fast(a_ext[:, :-1], a_ext[:, -1])
 
     return x_num
 
@@ -129,7 +123,7 @@ def meg__pivot_part(a, b):
 
     """Gaseste solutia numerica folosind metoda substitutiei descendente"""
 
-    x_num = subs_desc_slow(a_ext[:, :-1], a_ext[:, -1])
+    x_num = subs_desc_fast(a_ext[:, :-1], a_ext[:, -1])
 
     return x_num
 # ====================================================================================================
