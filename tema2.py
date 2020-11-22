@@ -40,7 +40,7 @@ def subs_asc_fast(a, b):
 # ====================================================================================================
 # Metoda de eliminare Gauss cu pivotare partiala
 # ====================================================================================================
-def meg__pivot_part(a, b):
+def meg_pivot_part(a, b):
     """Verific daca matricea 'a' este patratica + compatibila cu vectorul 'b'"""
 
     assert a.shape[0] == a.shape[1], 'Matricea sistemului nu este patratica'
@@ -85,7 +85,7 @@ def meg__pivot_part(a, b):
 
 """ Functii ajutatoare """
 # Metoda de eliminare Gauss cu pivotare partiala modificata pentru a calcula determinantul
-def determinant_meg__pivot_part(a):
+def determinant_meg_pivot_part(a):
     """Verific daca matricea 'a' este patratica"""
     assert a.shape[0] == a.shape[1], 'Matricea sistemului nu este patratica'
 
@@ -138,9 +138,37 @@ def EX1():
     b = np.array([112,33,54,-23])
 
     """ Verificare sistem cu solutie unica """
-    if(determinant_meg__pivot_part(A) == 0):
+    if(determinant_meg_pivot_part(A) == 0):
         raise AssertionError("Sistemul nu are solutie unica!")
 
+    """ Calcul solutie """
+    # TODO: meg cu pivot total
+    x_sol = meg_pivot_part(A,b)
+
+    # verificare solutie
+    if(not np.array_equal( np.dot(A,x_sol),b)):
+        assert "Duncea a scris o mare prostie!"
+
+    print("EX1: Solutia este:")
+    print(x_sol)
 
 """ Apel EX1 """
-EX1()
+# EX1()
+
+# ---------------------------------------------------------------------------------------------------
+# Exercitiul 2
+# ---------------------------------------------------------------------------------------------------
+def EX2():
+    """ Date de intrare """
+    B = np.array([[0,7,-3,-7],
+                  [1,-1,-3,8],
+                  [-9,1,3,-5],
+                  [6,-8,1.0,7]])
+    """ Verificare inversabila => apelam functia de la EX1 de calcul al det """
+    det = determinant_meg_pivot_part(B)
+    if(det == 0):
+        raise AssertionError("Matricea nu e inversabila!")
+
+
+""" Apel Ex2 """
+EX2()
