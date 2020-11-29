@@ -35,11 +35,10 @@ def subs_asc_fast(a, b):
     return x_num
 
 def LU_pivotare(a):
-    """ (Optionala) Verifica daca matricea 'a' este patratica + compatibila cu vect 'b' """
+    """ (Optionala) Verifica daca matricea 'a' este patratica"""
     assert a.shape[0] == a.shape[1], 'Matricea sistemului nu  este patratica!'
-    assert a.shape[0] == b.shape[0], 'Vectorul nu este compatibil'
 
-    n = b.shape[0] - 1
+    n = a.shape[0] - 1
 
     # construim matricea P
     Pm = np.identity(n+1)
