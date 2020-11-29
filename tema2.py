@@ -1,7 +1,6 @@
 # DUNCEA VLAD ALEXANDRU GRUPA 344
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 # ====================================================================================================
@@ -42,8 +41,8 @@ def subs_asc_fast(a, b):
 
     """ Determina solutia numerica. """
     x_num[0] = b[0] / a[0, 0]
-    for k in range(1, n):
-        s = np.dot(a[k, 0:k - 1], x_num[0:k - 1])
+    for k in range(1, n+1):
+        s = np.dot(a[k, 0:k], x_num[0:k])
         x_num[k] = (b[k] - s) / a[k, k]
 
     return x_num
@@ -58,6 +57,7 @@ def meg_pivot_part(a, b):
     assert a.shape[0] == a.shape[1], 'Matricea sistemului nu este patratica'
     assert a.shape[0] == b.shape[0], 'Matricea sistemului si vectorul b nu este patratica'
 
+    a = a.astype(float)
     a_ext = np.concatenate((a, b[:, None]), axis=1)
     n = b.shape[0] - 1
     for k in range(n):
@@ -96,7 +96,7 @@ def meg_pivot_part(a, b):
 def meg_pivot_total(a, b):
     """Verific daca matricea 'a' este patratica + compatibila cu vectorul 'b'"""
     assert a.shape[0] == a.shape[1], 'Matricea sistemului nu este patratica'
-    assert a.shape[0] == b.shape[0], 'Matricea sistemului si vectorul b nu este patratica'
+    assert a.shape[0] == b.shape[0], 'Matricea sistemului si vectorul b nu sunt compatibile'
     a = a.astype(float)
     a_ext = np.concatenate((a, b[:, None]), axis=1)
     n = b.shape[0] - 1
@@ -203,14 +203,14 @@ def EX1():
     b = np.array([112, 33, 54, -23])
 
     """ Verificare sistem cu solutie unica """
-    if (determinant_meg_pivot_part(A) == 0):
+    if determinant_meg_pivot_part(A) == 0:
         raise AssertionError("Sistemul nu are solutie unica!")
 
     """ Calcul solutie """
     x_sol = meg_pivot_total(A, b)
 
     # verificare solutie
-    if (not np.array_equal(np.dot(A, x_sol), b)):
+    if not np.array_equal(np.dot(A, x_sol), b):
         assert "Duncea a scris o mare prostie!"
 
     print("EX1: Solutia este:")
@@ -353,7 +353,8 @@ def EX3():
     """ Verificare corectitudine LU """
     X1 = np.matmul(L, U).round(5)
     X2 = np.matmul(Pm, A).round(5)
-    if not np.array_equal(X1, X2):
+    val = np.array_equal(X1, X2)
+    if not val:
         raise AssertionError('Calcul LU gresit!')
 
     """ Permutare b pentru a corespunde dupa posibilele mutari de linii in rezolvarea LU """
@@ -362,11 +363,11 @@ def EX3():
     """ Gasire solutie sistem """
     x_sol = rezolva_LU(L, U, b)
 
-    """ Permutare solutie pentru a corespunde cu sistemul initial """
-    x_sol = np.matmul(Pm, x_sol)
-
     """ Verificare solutie sistem """
-    if np.array_equal(b, np.matmul(A, x_sol).round(5)):
+    # permutam la loc b pentru verificare
+    b = np.matmul(Pm, b)
+    val = np.array_equal(b, np.matmul(A, x_sol).round(5))
+    if (not val):
         raise AssertionError('Calcul solutie prin factorizare LU gresit!')
 
     """ Afisare rezultat """
@@ -376,3 +377,59 @@ def EX3():
 
 """ Apel Ex3 """
 EX3()
+
+
+# ====================================================================================================
+# Exercitiul 4
+# ====================================================================================================
+
+""" Metoda cholesky """
+def fact_cholesky(A):
+    """ Verificari de baza """
+    assert A.shape[0] == A.shape[1], 'Matricea sistemului nu  este patratica!'
+
+    """ Verificare matrice simetrica """
+    # calculam diferenta dintre matricea noastra si transpusa ei si o comparam cu 0 (cu o eroare acceptabila)
+    if not np.all(np.abs(A - A.T) < 10**(-5)):
+        raise AssertionError('Matricea nu este simetrica')
+
+    """ Verificare matrice pozitiv definita """
+    n = A.shape[0] - 1
+    # folosim criteriul sylvester ( calculam det tuturor minorilor, si al matricei
+    # si verificam sa fie pozitivi)
+    for i in range(n+1):
+        det = determinant_meg_pivot_part(A[:i+1, :i+1])
+        if det <= 0:
+            raise AssertionError('Matricea nu e pozitiv definita!')
+
+    """ Valori initiale """
+    # valoarea alpha din curs
+    alph = A[0,0]
+    # matricea L
+    L = np.zeros([n+1, n+1])
+    # initializare valori L
+    L[0, 0] = np.sqrt(A[0, 0])
+    L[1:, 0] = A[1:, 0]/L[0, 0]
+
+    """ Calcul (formulele din curs) """
+    for k in range(1, n+1):
+        alph = A[k, k] - np.sum(np.power(L[k, 0:k],2))
+        L[k, k] = np.sqrt(alph)
+        for i in range(k+1,n+1):
+            L[i, k] = (A[i, k] - np.sum(L[i, 0:k] * L[k, 0:k]))/L[k, k]
+
+    return L
+
+""" Exercitiul 4 functie """
+def EX4():
+    A = np.array([  [16, -28, 36, -36],
+                    [-28, 74, -23, 63],
+                    [36, -23, 181, -75],
+                    [-36, 63, -75, 131]])
+
+    L = fact_cholesky(A)
+    print("EX4: Factorizarea: ")
+    print(L)
+
+""" Apel ex4 """
+# EX4()
