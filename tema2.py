@@ -2,7 +2,6 @@
 
 import numpy as np
 
-
 # ====================================================================================================
 # Functii ajutatoare colectate din laboratoare
 # ====================================================================================================
@@ -18,6 +17,7 @@ def subs_desc_fast(a, b):
     """ Initializeaza vectorul solutiei numerice. """
     n = b.shape[0] - 1
     x_num = np.zeros(shape=n + 1)
+
     """ Determina solutia numerica. """
     x_num[n] = b[n] / a[n, n]
     for k in range(n - 1, -1, -1):
@@ -53,16 +53,14 @@ def subs_asc_fast(a, b):
 # ===============================================================
 def meg_pivot_part(a, b):
     """Verific daca matricea 'a' este patratica + compatibila cu vectorul 'b'"""
-
     assert a.shape[0] == a.shape[1], 'Matricea sistemului nu este patratica'
-    assert a.shape[0] == b.shape[0], 'Matricea sistemului si vectorul b nu este patratica'
+    assert a.shape[0] == b.shape[0], 'Matricea sistemului si vectorul b nu sunt compatibile'
 
     a = a.astype(float)
     a_ext = np.concatenate((a, b[:, None]), axis=1)
     n = b.shape[0] - 1
     for k in range(n):
         """ Aflam pozitia pivotului de pe coloana k + compatibilitate sistem """
-
         if not a_ext[k:, k].any():
             raise AssertionError('Sistem incompatibil sau sistem comp nedeterminat')
         else:
@@ -74,7 +72,6 @@ def meg_pivot_part(a, b):
             a_ext[[p, k], :] = a_ext[[k, p], :]
 
         """Zero sub pozitia pivotului pe coloana"""
-
         for j in range(k + 1, n + 1):
             m = a_ext[j, k] / a_ext[k, k]
             a_ext[j, :] -= m * a_ext[k, :]
@@ -84,7 +81,6 @@ def meg_pivot_part(a, b):
         raise AssertionError('Sistem incompatibil sau sistem comp nedeterminat')
 
     """Gaseste solutia numerica folosind metoda substitutiei descendente"""
-
     x_num = subs_desc_fast(a_ext[:, :-1], a_ext[:, -1])
 
     return x_num
@@ -97,11 +93,14 @@ def meg_pivot_total(a, b):
     """Verific daca matricea 'a' este patratica + compatibila cu vectorul 'b'"""
     assert a.shape[0] == a.shape[1], 'Matricea sistemului nu este patratica'
     assert a.shape[0] == b.shape[0], 'Matricea sistemului si vectorul b nu sunt compatibile'
+
+    """ Date initiale """
     a = a.astype(float)
     a_ext = np.concatenate((a, b[:, None]), axis=1)
     n = b.shape[0] - 1
     # vector pentru a invarti solutia finala
     revert = np.arange(n + 1)
+
     for k in range(n):
         """Aflam pozitia pivotului + compatibilitate sistem"""
         if not a_ext[k:, k:n].any():
@@ -124,7 +123,6 @@ def meg_pivot_total(a, b):
             revert[[col, k]] = revert[[k, col]]
 
         """Zero sub pozitia pivotului pe coloana"""
-
         for j in range(k + 1, n + 1):
             m = a_ext[j, k] / a_ext[k, k]
             a_ext[j, :] -= m * a_ext[k, :]
@@ -152,8 +150,9 @@ def meg_pivot_total(a, b):
 # Metoda de eliminare Gauss cu pivotare partiala modificata pentru a calcula determinantul
 def determinant_meg_pivot_part(a):
     """Verific daca matricea 'a' este patratica"""
-    assert a.shape[0] == a.shape[1], 'Matricea sistemului nu este patratica'
+    assert a.shape[0] == a.shape[1], 'Matricea nu este patratica'
 
+    """ Valori initiale """
     a = a.astype(float)
     n = a.shape[0] - 1
     # variabila folosita pentru a determina semnul det
@@ -161,7 +160,6 @@ def determinant_meg_pivot_part(a):
 
     for k in range(n):
         """Aflam pozitia pivotului de pe coloana k """
-
         # daca nu avem elem != 0 atunci det e 0
         if not a[k:, k].any():
             return 0
@@ -175,7 +173,6 @@ def determinant_meg_pivot_part(a):
             contorSemn += 1
 
         """ Zero sub pozitia pivotului pe coloana """
-
         for j in range(k + 1, n + 1):
             m = a[j, k] / a[k, k]
             a[j, :] -= m * a[k, :]
@@ -189,6 +186,7 @@ def determinant_meg_pivot_part(a):
     for i in range(n + 1):
         val *= a[i, i]
 
+    """ Aflare semn det in functie de numarul de permutari de linii """
     val *= (-1) ** contorSemn
     return val
 
@@ -210,8 +208,9 @@ def EX1():
     x_sol = meg_pivot_total(A, b)
 
     # verificare solutie
-    if not np.array_equal(np.dot(A, x_sol), b):
-        assert "Duncea a scris o mare prostie!"
+    val = np.array_equal(np.dot(A, x_sol).round(5), b.round(5))
+    if not val:
+        raise AssertionError("Eroare la calcul solutie!")
 
     print("EX1: Solutia este:")
     print(x_sol)
@@ -229,8 +228,7 @@ def EX1():
 # Calcul inversa
 # ============================================================
 def calculeaza_inversa(a):
-    """ Initializeaza o matrice pentru stocarea solutiei -> O sa fie inversa """
-    """ Genereaza matricea de vectori din dreapta egalului cu matricea identitate """
+    """ Initializare valori """
     n = a.shape[0]
     idm = np.identity(n)
     inversa = np.zeros((n, n))
@@ -261,11 +259,10 @@ def EX2():
     sol = calculeaza_inversa(B)
 
     """ Verificare calcule """
-    verif = np.matmul(B, sol)
     # rotunjim valorile pentru a elimina posibilele erori de calcul
-    verif = np.ma.round(verif, 5)
+    verif = np.matmul(B, sol).round(5)
     if not np.array_equal(verif, np.identity(B.shape[0])):
-        raise AssertionError("Eroare la calculul inversei")
+        raise AssertionError("Eroare la calculul inversei!")
 
     """ Afisare rezultat """
     print("EX2: Inversa matricei B este: ")
@@ -281,20 +278,19 @@ def EX2():
 # ====================================================================================================
 
 def LU_pivotare(a):
-    """ (Optionala) Verifica daca matricea 'a' este patratica"""
+    """ Verifica daca matricea 'a' este patratica"""
     assert a.shape[0] == a.shape[1], 'Matricea sistemului nu  este patratica!'
+
+    """ Matricea U se va calcula direct in 'a' """
     a = a.astype(float)
-
     n = a.shape[0] - 1
-
     # construim matricea Permutare
     Pm = np.identity(n + 1)
-
     # construim matricea L
     L = np.zeros([n + 1, n + 1])
 
     for k in range(n):
-        """Verificare compatib sistem, Aflam pozitia pivotului de pe coloana k"""
+        """ Verificare compatib sistem, Aflam pozitia pivotului de pe coloana k """
         if not a[k:, k].any():
             raise AssertionError('sistem incompatibil sau sist compatibil nedet.')
         else:
@@ -322,13 +318,14 @@ def LU_pivotare(a):
     if a[n, n] == 0:
         raise AssertionError('Sist incompat sau nedet')
 
-    # in a avem U in L avem L fara In
+    # in a avem U si in L avem L, dar fara I(n)
     L += np.identity(n + 1)
 
     return L, a, Pm
 
 
 def rezolva_LU(L, U, B):
+    """ Functie care aplica substitutia asc+desc pentru a rezolva sistemul """
     x_num = subs_asc_fast(L, B)
     x_num1 = subs_desc_fast(U, x_num)
     return x_num1
@@ -348,6 +345,7 @@ def EX3():
     if det == 0:
         raise AssertionError("Matricea nu e inversabila!")
 
+    """ Apel pentru calcul L U """
     L, U, Pm = LU_pivotare(A)
 
     """ Verificare corectitudine LU """
@@ -367,7 +365,7 @@ def EX3():
     # permutam la loc b pentru verificare
     b = np.matmul(Pm, b)
     val = np.array_equal(b, np.matmul(A, x_sol).round(5))
-    if (not val):
+    if not val:
         raise AssertionError('Calcul solutie prin factorizare LU gresit!')
 
     """ Afisare rezultat """
@@ -376,7 +374,7 @@ def EX3():
 
 
 """ Apel Ex3 """
-EX3()
+# EX3()
 
 
 # ====================================================================================================
@@ -388,13 +386,15 @@ def fact_cholesky(A):
     """ Verificari de baza """
     assert A.shape[0] == A.shape[1], 'Matricea sistemului nu  este patratica!'
 
+    """ Date initiale """
+    n = A.shape[0] - 1
+
     """ Verificare matrice simetrica """
     # calculam diferenta dintre matricea noastra si transpusa ei si o comparam cu 0 (cu o eroare acceptabila)
     if not np.all(np.abs(A - A.T) < 10**(-5)):
         raise AssertionError('Matricea nu este simetrica')
 
     """ Verificare matrice pozitiv definita """
-    n = A.shape[0] - 1
     # folosim criteriul sylvester ( calculam det tuturor minorilor, si al matricei
     # si verificam sa fie pozitivi)
     for i in range(n+1):
@@ -404,7 +404,7 @@ def fact_cholesky(A):
 
     """ Valori initiale """
     # valoarea alpha din curs
-    alph = A[0,0]
+    alph = A[0, 0]
     # matricea L
     L = np.zeros([n+1, n+1])
     # initializare valori L
@@ -420,7 +420,8 @@ def fact_cholesky(A):
 
     return L
 
-""" Exercitiul 4 functie """
+
+""" Exercitiul in sine """
 def EX4():
     A = np.array([  [16, -28, 36, -36],
                     [-28, 74, -23, 63],
@@ -432,4 +433,4 @@ def EX4():
     print(L)
 
 """ Apel ex4 """
-# EX4()
+EX4()
