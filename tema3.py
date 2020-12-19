@@ -154,27 +154,51 @@ def grafic_f(A, b):
     fig1.show()
 
 
-def linii_nivel(A, b, levels=10):
-    """
-    Construieste liniile de nivel ale functiei f
-    """
+def met_pas_desc(point, A, b):
+    # Initializari
+    r = b - np.dot(A, point)
+    pointX = []
+    pointY = []
+    pointX.append(point[0])
+    pointY.append(point[1])
+    while abs(np.prod(r)) > 10**(-10):
+        # calucl alpha
+        alph = np.divide(np.dot(r.T, r), np.dot(r.T,np.dot(A,r)))
+        # calcul punct nou
+        point = point + np.dot(alph,r)
+        # adaugare punct la lista
+        pointX.append(point[0])
+        pointY.append(point[1])
+        # calcul reziduu nou
+        r = b - np.dot(A, point)
 
-    # Construieste gridul asociat functiei
-    (X1, X2, X3) = grid_discret(A, b)
+    return pointX,pointY
 
-    # Ploteaza liniile de nivel ale functiei f
-    fig2 = plt.figure()
-    plt.contour(X1, X2, X3, levels=levels)  # levels = numarul de linii de nivel
+def met_grad_conjugati(point, A, b):
+    # Initializari
+    r = b - np.dot(A, point)
+    d = r
+    pointX = []
+    pointY = []
+    pointX.append(point[0])
+    pointY.append(point[1])
+    while abs(np.prod(r)) > 10**(-10):
+        # calucl alpha
+        alph = np.divide(np.dot(r.T, r), np.dot(d.T,np.dot(A,d)))
+        # calcul punct nou
+        point = point + np.dot(alph, d)
+        # adaugare punct la lista
+        pointX.append(point[0])
+        pointY.append(point[1])
+        # calcul reziduu nou
+        r_vechi = r
+        r = r - alph*np.dot(A, d)
+        #calcul beta(ajutor pt noua directie)
+        beta = np.divide(np.dot(r.T,r),np.dot(r_vechi.T,r_vechi))
+        # calculam noua directie
+        d = r + np.dot(beta, d)
 
-    # Etichete pe axe
-    plt.xlabel('x1')
-    plt.ylabel('x2')
-
-    # Titlu
-    plt.title('Liniile de nivel ale functiei f')
-
-    # Afiseaza figura
-    fig2.show()
+    return pointX,pointY
 
 def Ex1():
     # Functia data
@@ -185,7 +209,45 @@ def Ex1():
 
     # Afisare grafice
     grafic_f(A, b)
-    linii_nivel(A, b)
+
+    """ Metoda pasului descendent """
+    # calcul minim cu pas descendent
+    pointX, pointY = met_pas_desc(np.array([0,0]), A, b)
+    # Construieste gridul asociat functiei
+    (X1, X2, X3) = grid_discret(A, b)
+    # Ploteaza liniile de nivel ale functiei f
+    fig2 = plt.figure()
+    plt.contour(X1, X2, X3, levels=10)  # levels = numarul de linii de nivel
+    # Etichete pe axe
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    # Titlu
+    plt.title('Gasire minim cu met pasului descendent')
+    plt.plot(pointX, pointY, c='b', linewidth=2, label='Drum')
+    plt.scatter(pointX, pointY, marker='.', c='red', s=20, label='Puncte alese')
+    # Afiseaza figura
+    plt.legend()
+    fig2.show()
+
+    """ Metoda gradientilor conjugati """
+    # calcul minim cu pas descendent
+    pointX, pointY = met_grad_conjugati(np.array([0, 0]), A, b)
+    # Construieste gridul asociat functiei
+    # Ploteaza liniile de nivel ale functiei f
+    fig3 = plt.figure()
+    plt.contour(X1, X2, X3, levels=10)  # levels = numarul de linii de nivel
+    # Etichete pe axe
+    plt.xlabel('x1')
+    plt.ylabel('x2')
+    # Titlu
+    plt.title('Gasire minim cu met gradientilor conjugati')
+    plt.plot(pointX, pointY, c='b', linewidth=2, label='Drum')
+    plt.scatter(pointX, pointY, marker='.', c='red', s=20, label='Puncte alese')
+    # Afiseaza figura
+    plt.legend()
+    fig3.show()
+
+
 
 #Apelare ex1
 Ex1()
@@ -331,3 +393,157 @@ def ex2():
 
 # Apelare ex2
 #ex2()
+
+
+# ====================================================================================================
+# EX3
+# ====================================================================================================
+
+def spline_liniara(X, Y, pointx):
+    """ Metoda de interpolare spline liniara.
+    :param X: X = [X0, X1, ..., Xn]
+    :param Y: [Y0=f(X0), Y1=F(X1), ..., Yn=f(Xn)]
+    :param pointx: Punct in care doresti o valoare aproximata a functiei
+
+    :return: aprox_value: Valoarea aproximata calculata interpolarea spline liniara in pointx
+    """
+    # PAS 1
+    n = X.shape[0] - 1
+    a =np.zeros([n])
+    b = np.zeros([n])
+
+    # PAS 2
+    for j in range(n):
+        a[j] = Y[j]
+        b[j] = (Y[j+1] - Y[j]) / (X[j+1] - X[j])
+
+    # PAS 3
+    for j in range(n):
+        if X[j] <= pointx <= X[j+1]:
+
+            return a[j] + b[j] * (pointx - X[j])
+
+    return -1
+
+def spline_patratica(X, Y, pointx):
+    """ Metoda de interpolare spline liniara.
+    :param X: X = [X0, X1, ..., Xn]
+    :param Y: [Y0=f(X0), Y1=F(X1), ..., Yn=f(Xn)]
+    :param pointx: Punct in care doresti o valoare aproximata a functiei
+    :return: aprox_value: Valoarea aproximata calculata interpolarea spline patratica in pointx
+    """
+    # PAS 1
+    n = X.shape[0] - 1
+    a =np.zeros([n])
+    b = np.zeros([n])
+
+    # PAS 2
+    for j in range(n):
+        a[j] = Y[j]
+        b[j] = (Y[j+1] - Y[j]) / (X[j+1] - X[j])
+
+    # PAS 3
+    for j in range(n):
+        if X[j] <= pointx <= X[j+1]:
+
+            return a[j] + b[j] * (pointx - X[j])
+
+    return -1
+
+def spline_cubica(X, Y, pointx):
+    """ Metoda de interpolare spline liniara.
+    :param X: X = [X0, X1, ..., Xn]
+    :param Y: [Y0=f(X0), Y1=F(X1), ..., Yn=f(Xn)]
+    :param pointx: Punct in care doresti o valoare aproximata a functiei
+    :return: aprox_value: Valoarea aproximata calculata interpolarea spline patratica in pointx
+    """
+    # PAS 1
+    n = X.shape[0] - 1
+    a =np.zeros([n])
+    b = np.zeros([n])
+
+    # PAS 2
+    for j in range(n):
+        a[j] = Y[j]
+        b[j] = (Y[j+1] - Y[j]) / (X[j+1] - X[j])
+
+    # PAS 3
+    for j in range(n):
+        if X[j] <= pointx <= X[j+1]:
+
+            return a[j] + b[j] * (pointx - X[j])
+
+    return -1
+
+# Functia care trebuie aproximata
+def fex3(x):
+    """ Functia din exercitiu. """
+    y = -6 * np.sin(3*x) + 2*np.cos(-9*x) - 26.23*x
+    return y
+
+
+# ex3 in sine
+def ex3():
+    # Intervalul dat
+    interval = [-np.pi, np.pi]  # [a, b]
+
+    x_domain = np.linspace(interval[0], interval[1], 200)  # Discretizare domeniu (folosit pentru plotare)
+    y_values = fex3(x_domain)  # Valorile functiei exacte in punctele din discretizare
+
+    # Afisare grafic figure
+    plt.figure(0)
+    plt.plot(x_domain, y_values, c='k', linewidth=2, label='Functie exacta')
+    plt.xlabel('x')
+    plt.ylabel('y = f(x)')
+    plt.grid()
+
+    #eroarea maxima dorita
+    err_dorit = 10**(-5)
+    # eroarea maxima obtinuta (intial orice mai mare ca err dorita)
+    err_max = err_dorit + 1
+
+    #Gradul maxim polinomului(initial 2)
+    N = 5 # Va creste pana avem eroarea dorita
+    while(err_max > err_dorit):
+        #oprire in caz ca ajungem la un N prea mare
+        if(N > 100):
+            raise AssertionError("Nu am reusit sa ajungem la gradul de aproximare dorit!")
+
+        x_stiut = np.linspace(interval[0], interval[1], N + 1)  # Discretizare interval (nodurile date de client)
+        y_stiut = fex3(x_stiut)  # Valorile functiei in nodurile date de client
+
+        # Calculare discretizare polinom
+        y_interp = np.zeros(len(x_domain))  # Folosit pentru a stoca valorile aproximate
+        for i in range(len(x_domain)):
+            y_interp[i] = spline_liniara(x_stiut, y_stiut, x_domain[i])
+
+        err_max = eroare_maxima_trunchiere(y_interp,y_values)
+        #Afisare de testare
+        print("Maxim eroare interp lagrange pt N = "+str(N) + " : "+ str(err_max))
+        break
+        #Crestem N
+        N += 1
+
+    """ Avem N care satisface constrangerile de aproximare """
+    # Afisare date client pe grafic
+    plt.scatter(x_stiut, y_stiut, marker='*', c='red', s=200, label='Date stiute')
+
+
+    # Afisare grafic aprixomare
+    plt.plot(x_domain, y_interp, c='b', linewidth=1, linestyle='-', label='Spline Cubica')
+    plt.title('Interpolare Spline Cubica, N={}'.format(N))
+    plt.legend()
+    plt.show()
+
+    #Grafic eroare
+    plt.figure(1)
+    plt.plot(x_domain, eroare_trunchiere(y_interp,y_values), c='k', linewidth=2, label='Eroarea')
+    plt.xlabel('x')
+    plt.ylabel('y = f(x)')
+    plt.grid()
+    plt.title('Eroarea pt Interpolare Spline Cubica, N={}'.format(N))
+    plt.legend()
+    plt.show()
+
+#Apel ex3
+# ex3()
