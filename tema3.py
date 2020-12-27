@@ -114,8 +114,8 @@ def grid_discret(A, b, size=100):
     """
 
     # size ->  Numar de puncte pe fiecare axa
-    x1 = np.linspace(-2, 20, size)  # Axa x1
-    x2 = np.linspace(-12, 2, size)  # Axa x2
+    x1 = np.linspace(-4, 4, size)  # Axa x1
+    x2 = np.linspace(-4, 4, size)  # Axa x2
     X1, X2 = np.meshgrid(x1, x2)  # Creeaza un grid pe planul determinat de axele x1 si x2
 
     X3 = np.zeros((size, size))
@@ -202,17 +202,17 @@ def met_grad_conjugati(point, A, b):
 
 def Ex1():
     # Functia data
-    # 4.5*(x**2) + 12*x*y - 5*x + 10*(y**2) + 4*y
+    # 8*(x**2) + 4*x*y - 4*x + 13*(y**2) + 7*y
     # O desfacem in A,b
-    A = np.array([[8, 12.0], [12.0, 20.0]]) # A este simetrica si pozitiv definita
-    b = np.array([5, -4])
+    A = np.array([[16, 4.0], [4.0, 13.0]]) # A este simetrica si pozitiv definita
+    b = np.array([-4, 7])
 
     # Afisare grafice
     grafic_f(A, b)
 
     """ Metoda pasului descendent """
     # calcul minim cu pas descendent
-    pointX, pointY = met_pas_desc(np.array([0,0]), A, b)
+    pointX, pointY = met_pas_desc(np.array([3,2]), A, b)
     # Construieste gridul asociat functiei
     (X1, X2, X3) = grid_discret(A, b)
     # Ploteaza liniile de nivel ale functiei f
@@ -223,15 +223,15 @@ def Ex1():
     plt.ylabel('x2')
     # Titlu
     plt.title('Gasire minim cu met pasului descendent')
-    plt.plot(pointX, pointY, c='b', linewidth=2, label='Drum')
-    plt.scatter(pointX, pointY, marker='.', c='red', s=20, label='Puncte alese')
+    plt.plot(pointX, pointY, linewidth=2, label='Drum')
+    plt.scatter(pointX, pointY, marker='.',  s=20, label='Puncte alese')
     # Afiseaza figura
     plt.legend()
     fig2.show()
 
     """ Metoda gradientilor conjugati """
     # calcul minim cu pas descendent
-    pointX, pointY = met_grad_conjugati(np.array([0, 0]), A, b)
+    pointX, pointY = met_grad_conjugati(np.array([3, 2]), A, b)
     # Construieste gridul asociat functiei
     # Ploteaza liniile de nivel ale functiei f
     fig3 = plt.figure()
@@ -241,8 +241,8 @@ def Ex1():
     plt.ylabel('x2')
     # Titlu
     plt.title('Gasire minim cu met gradientilor conjugati')
-    plt.plot(pointX, pointY, c='b', linewidth=2, label='Drum')
-    plt.scatter(pointX, pointY, marker='.', c='red', s=20, label='Puncte alese')
+    plt.plot(pointX, pointY, linewidth=2, label='Drum')
+    plt.scatter(pointX, pointY, marker='.', s=20, label='Puncte alese')
     # Afiseaza figura
     plt.legend()
     fig3.show()
@@ -250,7 +250,7 @@ def Ex1():
 
 
 #Apelare ex1
-Ex1()
+# Ex1()
 
 # ====================================================================================================
 # EX2
@@ -322,7 +322,7 @@ def metoda_newton_polLagrange(X, Y, pointx):
 # Functia care trebuie aproximata
 def fex2(x):
     """ Functia din exercitiu. """
-    y = -4 * np.sin(-x) + 9*np.cos(8*x) - 5.01*x
+    y = -5 * np.sin(-4*x) + 5*np.cos(3*x) - 6.38*x
     return y
 
 # ex2 in sine
@@ -341,12 +341,12 @@ def ex2():
     plt.grid()
 
     #eroarea maxima dorita
-    err_dorit = 10**(-2)
+    err_dorit = 10**(-4)
     # eroarea maxima obtinuta (intial orice mai mare ca err dorita)
     err_max = err_dorit + 1
 
     #Gradul maxim polinomului(initial 2)
-    N = 40 # Va creste pana avem eroarea dorita
+    N = 2 # Va creste pana avem eroarea dorita
     while(err_max > err_dorit):
         #oprire in caz ca ajungem la un N prea mare
         if(N > 100):
@@ -365,8 +365,8 @@ def ex2():
         err_max = eroare_maxima_trunchiere(y_interp_lagrange,y_values)
         #Afisare de testare
         print("Maxim eroare interp lagrange pt N = "+str(N) + " : "+ str(err_max))
-        break
-        #Crestem N
+        # break
+        # Crestem N
         N += 1
 
     """ Avem N care satisface constrangerile de aproximare """
@@ -392,7 +392,7 @@ def ex2():
     plt.show()
 
 # Apelare ex2
-#ex2()
+ex2()
 
 
 # ====================================================================================================
