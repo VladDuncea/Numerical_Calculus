@@ -157,12 +157,16 @@ def grafic_f(A, b):
 def met_pas_desc(point, A, b):
     # Initializari
     r = b - np.dot(A, point)
+    # vectori pentru afisarea punctelor
     pointX = []
     pointY = []
+    # adaugam punctul initial
     pointX.append(point[0])
     pointY.append(point[1])
+
+    # alg in sine
     while abs(np.prod(r)) > 10**(-10):
-        # calucl alpha
+        # calcul alpha
         alph = np.divide(np.dot(r.T, r), np.dot(r.T,np.dot(A,r)))
         # calcul punct nou
         point = point + np.dot(alph,r)
@@ -172,16 +176,21 @@ def met_pas_desc(point, A, b):
         # calcul reziduu nou
         r = b - np.dot(A, point)
 
-    return pointX,pointY
+    return pointX, pointY
+
 
 def met_grad_conjugati(point, A, b):
     # Initializari
     r = b - np.dot(A, point)
     d = r
+    # vectori pentru afisarea punctelor
     pointX = []
     pointY = []
+    # adaugam punctul initial
     pointX.append(point[0])
     pointY.append(point[1])
+
+    # alg in sine
     while abs(np.prod(r)) > 10**(-10):
         # calucl alpha
         alph = np.divide(np.dot(r.T, r), np.dot(d.T,np.dot(A,d)))
@@ -198,7 +207,8 @@ def met_grad_conjugati(point, A, b):
         # calculam noua directie
         d = r + np.dot(beta, d)
 
-    return pointX,pointY
+    return pointX, pointY
+
 
 def Ex1():
     # Functia data
@@ -212,7 +222,7 @@ def Ex1():
 
     """ Metoda pasului descendent """
     # calcul minim cu pas descendent
-    pointX, pointY = met_pas_desc(np.array([3,2]), A, b)
+    pointX, pointY = met_pas_desc(np.array([3, 2]), A, b)
     # Construieste gridul asociat functiei
     (X1, X2, X3) = grid_discret(A, b)
     # Ploteaza liniile de nivel ale functiei f
@@ -297,9 +307,9 @@ def metoda_newton_polLagrange(X, Y, pointx):
     # n este nr de puncte
     n = Y.shape[0]
 
-    #A va fi matricea sistemului de ecuatii
+    # A va fi matricea sistemului de ecuatii
     A = np.zeros([n,n])
-    A[:,0] = 1
+    A[:, 0] = 1
 
     for i in range(1,n):
         prod = 1
@@ -307,10 +317,10 @@ def metoda_newton_polLagrange(X, Y, pointx):
             prod *= X[i]-X[j-1]
             A[i, j] = prod
 
-    #rezolvare sistem cu met subst
+    # rezolvare sistem cu met subst
     C = subs_asc_fast(A,Y)
 
-    #Calcul aproximare
+    # Calcul aproximare
     approx = C[0]
     prod = 1
     for i in range(1,n):
@@ -319,11 +329,13 @@ def metoda_newton_polLagrange(X, Y, pointx):
 
     return approx
 
+
 # Functia care trebuie aproximata
 def fex2(x):
     """ Functia din exercitiu. """
     y = -5 * np.sin(-4*x) + 5*np.cos(3*x) - 6.38*x
     return y
+
 
 # ex2 in sine
 def ex2():
@@ -340,16 +352,16 @@ def ex2():
     plt.ylabel('y = f(x)')
     plt.grid()
 
-    #eroarea maxima dorita
-    err_dorit = 10**(-4)
+    # eroarea maxima dorita
+    err_dorit = 10**(-5)
     # eroarea maxima obtinuta (intial orice mai mare ca err dorita)
     err_max = err_dorit + 1
 
-    #Gradul maxim polinomului(initial 2)
-    N = 2 # Va creste pana avem eroarea dorita
-    while(err_max > err_dorit):
-        #oprire in caz ca ajungem la un N prea mare
-        if(N > 100):
+    # Gradul maxim polinomului(initial 2)
+    N = 2   # Va creste pana avem eroarea dorita
+    while err_max > err_dorit:
+        # oprire in caz ca ajungem la un N prea mare
+        if N > 100:
             raise AssertionError("Nu am reusit sa ajungem la gradul de aproximare dorit!")
 
         x_stiut = np.linspace(interval[0], interval[1], N + 1)  # Discretizare interval (nodurile date de client)
@@ -363,7 +375,7 @@ def ex2():
             y_interp_lagrange2[i] = metoda_lagrange(x_stiut, y_stiut, x_domain[i])
 
         err_max = eroare_maxima_trunchiere(y_interp_lagrange,y_values)
-        #Afisare de testare
+        # Afisare eroare
         print("Maxim eroare interp lagrange pt N = "+str(N) + " : "+ str(err_max))
         # break
         # Crestem N
@@ -373,7 +385,6 @@ def ex2():
     # Afisare date client pe grafic
     plt.scatter(x_stiut, y_stiut, marker='*', c='red', s=200, label='Date stiute')
 
-
     # Afisare grafic aprixomare
     plt.plot(x_domain, y_interp_lagrange, c='b', linewidth=1, linestyle='-', label='Metoda Lagrange calc cu Newton')
     plt.plot(x_domain, y_interp_lagrange2, c='r', linewidth=1, linestyle='-.', label='Metoda Lagrange')
@@ -381,7 +392,7 @@ def ex2():
     plt.legend()
     plt.show()
 
-    #Grafic eroare
+    # Grafic eroare
     plt.figure(1)
     plt.plot(x_domain, eroare_trunchiere(y_interp_lagrange,y_values), c='k', linewidth=2, label='Eroarea')
     plt.xlabel('x')
@@ -390,6 +401,7 @@ def ex2():
     plt.title('Eroarea pt Interpolare Lagrange, N={}'.format(N))
     plt.legend()
     plt.show()
+
 
 # Apelare ex2
 ex2()
@@ -407,17 +419,17 @@ def spline_liniara(X, Y, pointx):
 
     :return: aprox_value: Valoarea aproximata calculata interpolarea spline liniara in pointx
     """
-    # PAS 1
+    # PAS 1 Initializari
     n = X.shape[0] - 1
-    a =np.zeros([n])
+    a = np.zeros([n])
     b = np.zeros([n])
 
-    # PAS 2
+    # PAS 2 Calcul coeficienti
     for j in range(n):
         a[j] = Y[j]
         b[j] = (Y[j+1] - Y[j]) / (X[j+1] - X[j])
 
-    # PAS 3
+    # PAS 3 Gasire interval si intoarcere valoare
     for j in range(n):
         if X[j] <= pointx <= X[j+1]:
 
@@ -425,61 +437,132 @@ def spline_liniara(X, Y, pointx):
 
     return -1
 
-def spline_patratica(X, Y, pointx):
-    """ Metoda de interpolare spline liniara.
+
+def spline_patratica(X, Y):
+    """ Metoda de interpolare spline patratica.
     :param X: X = [X0, X1, ..., Xn]
-    :param Y: [Y0=f(X0), Y1=F(X1), ..., Yn=f(Xn)]
-    :param pointx: Punct in care doresti o valoare aproximata a functiei
-    :return: aprox_value: Valoarea aproximata calculata interpolarea spline patratica in pointx
+    :param Y: [Y0=f(X0), Y1=f(X1), ..., Yn=f(Xn)]
+    :return: coeficientii aflati
     """
-    # PAS 1
+
     n = X.shape[0] - 1
-    a =np.zeros([n])
-    b = np.zeros([n])
 
-    # PAS 2
-    for j in range(n):
-        a[j] = Y[j]
-        b[j] = (Y[j+1] - Y[j]) / (X[j+1] - X[j])
+    # matricea M
+    M = np.zeros([3*n, 3*n])
+    # vectorul solutie
+    sol = np.zeros(3*n)
+    sol[0] = Y[0]
+    for i in range(1, n):
+        sol[2*i-1] = Y[i]
+        sol[2*i] = Y[i]
+    sol[2*n-1] = Y[n]
 
-    # PAS 3
-    for j in range(n):
-        if X[j] <= pointx <= X[j+1]:
+    # Construim partea 1 din M(primele 2n ecuatii)
+    for i in range(n):
+        M[2*i, 3*i] = X[i]*X[i]
+        M[2*i, 3*i+1] = X[i]
+        M[2*i, 3*i+2] = 1
+        M[2 * i+1, 3 * i] = X[i+1] * X[i+1]
+        M[2 * i+1, 3 * i + 1] = X[i+1]
+        M[2 * i+1, 3 * i + 2] = 1
 
-            return a[j] + b[j] * (pointx - X[j])
+    # Construim partea 2 din M (urmatoarele n-1 ecuatii)
+    for i in range(n-1):
+        M[2*n+i, 3 * i] = 2*X[i+1]
+        M[2*n+i, 3 * i + 1] = 1
 
-    return -1
+        M[2*n+i, 3 * i + 3] = -2*X[i+1]
+        M[2*n+i, 3 * i + 4] = -1
 
-def spline_cubica(X, Y, pointx):
-    """ Metoda de interpolare spline liniara.
-    :param X: X = [X0, X1, ..., Xn]
-    :param Y: [Y0=f(X0), Y1=F(X1), ..., Yn=f(Xn)]
-    :param pointx: Punct in care doresti o valoare aproximata a functiei
-    :return: aprox_value: Valoarea aproximata calculata interpolarea spline patratica in pointx
-    """
-    # PAS 1
+    # Adaugam ultima linie (ca sa avem 3n ecuatii)
+    M[3*n - 1, 0] = 1
+
+    coef = meg_pivot_total(M, sol)
+
+    return coef
+
+
+def rez_spline_patratica(coef, X, pointx):
     n = X.shape[0] - 1
-    a =np.zeros([n])
-    b = np.zeros([n])
 
-    # PAS 2
-    for j in range(n):
-        a[j] = Y[j]
-        b[j] = (Y[j+1] - Y[j]) / (X[j+1] - X[j])
+    # cautam intre ce puncte este punctul dat
+    i = 0
+    for i in range(n):
+        if X[i] <= pointx <= X[i+1]:
+            break
+    a = coef[3*i]
+    b = coef[3*i+1]
+    c = coef[3*i+2]
+    return a*pow(pointx, 2) + b*pointx + c
 
-    # PAS 3
-    for j in range(n):
-        if X[j] <= pointx <= X[j+1]:
 
-            return a[j] + b[j] * (pointx - X[j])
+def spline_cubica_curs(X, Y):
+    # Dimensiunea
+    n = X.shape[0] - 1
+    # Distanta dintre doua puncte
+    h = X[1]-X[0]
 
-    return -1
+    # Calcul b (Y_b este vectorul valorilor, B este matricea sistemului)
+    B = np.zeros([n+1,n+1])
+    Y_b = np.zeros([n + 1])
+    B[0,0] = 1
+    B[n,n] = 1
+    Y_b[0] = fex3deriv(X[0])
+    Y_b[n] = fex3deriv(X[n])
+    for i in range(1,n):
+        B[i, i-1] = 1
+        B[i, i] = 4
+        B[i, i+1] = 1
+        Y_b[i] = (3/h) * (Y[i+1] - Y[i-1])
+
+    # Aflare coef b prin met gauss
+    b = meg_pivot_total(B, Y_b)
+
+    # Calcul c si d
+    c = np.zeros([n])
+    d = np.zeros([n])
+    for i in range(n):
+        d[i] = (-2/pow(h, 3))*(Y[i+1] - Y[i]) + pow(h, -2)*(b[i+1] + b[i])
+        c[i] = (3/pow(h, 2))*(Y[i+1] - Y[i]) - (b[i+1] + 2*b[i])/h
+
+    # asezare coeficienti in un vector de dimensiune 4n
+    coef = np.zeros([4 * n])
+    for i in range(n):
+        coef[4 * i] = Y[i]
+        coef[4 * i + 1] = b[i]
+        coef[4 * i + 2] = c[i]
+        coef[4 * i + 3] = d[i]
+
+    return coef
+
+
+def rez_spline_cubica(coef, X, pointx):
+    n = X.shape[0] - 1
+
+    # cautam intre ce puncte este punctul dat
+    i = 0
+    for i in range(n):
+        if X[i] <= pointx <= X[i+1]:
+            break
+    a = coef[4*i]
+    b = coef[4*i+1]
+    c = coef[4*i+2]
+    d = coef[4*i+3]
+
+    val = pointx - X[i]
+
+    return d*pow(val, 3) + c*pow(val, 2) + b*val + a
+
 
 # Functia care trebuie aproximata
 def fex3(x):
     """ Functia din exercitiu. """
-    y = -6 * np.sin(3*x) + 2*np.cos(-9*x) - 26.23*x
-    return y
+    return -5 * np.sin(4*x) + 2*np.cos(-2*x) - 13.79*x
+
+
+# Derivata functiei
+def fex3deriv(x):
+    return -20 * np.cos(4 * x) + 4*np.sin(-2 * x) - 13.79
 
 
 # ex3 in sine
@@ -497,16 +580,16 @@ def ex3():
     plt.ylabel('y = f(x)')
     plt.grid()
 
-    #eroarea maxima dorita
-    err_dorit = 10**(-5)
+    # eroarea maxima dorita NU ATINGE 10^(-5)
+    err_dorit = 10**(-4)
     # eroarea maxima obtinuta (intial orice mai mare ca err dorita)
     err_max = err_dorit + 1
 
-    #Gradul maxim polinomului(initial 2)
-    N = 5 # Va creste pana avem eroarea dorita
-    while(err_max > err_dorit):
-        #oprire in caz ca ajungem la un N prea mare
-        if(N > 100):
+    # Gradul maxim al polinomului(initial 3)
+    N = 3   # Va creste pana avem eroarea dorita
+    while err_max > err_dorit:
+        # oprire in caz ca ajungem la un N prea mare
+        if N > 100:
             raise AssertionError("Nu am reusit sa ajungem la gradul de aproximare dorit!")
 
         x_stiut = np.linspace(interval[0], interval[1], N + 1)  # Discretizare interval (nodurile date de client)
@@ -514,20 +597,21 @@ def ex3():
 
         # Calculare discretizare polinom
         y_interp = np.zeros(len(x_domain))  # Folosit pentru a stoca valorile aproximate
+        # calcul coeficienti doar o data(mult mai rapid)
+        coef = spline_cubica_curs(x_stiut, y_stiut)
         for i in range(len(x_domain)):
-            y_interp[i] = spline_liniara(x_stiut, y_stiut, x_domain[i])
+            y_interp[i] = rez_spline_cubica(coef, x_stiut, x_domain[i])
 
         err_max = eroare_maxima_trunchiere(y_interp,y_values)
-        #Afisare de testare
-        print("Maxim eroare interp lagrange pt N = "+str(N) + " : "+ str(err_max))
-        break
-        #Crestem N
+        # Afisare de testare
+        print("Maxim eroare spline cubica pt N = "+str(N) + " : "+ str(err_max))
+
+        # Crestem N
         N += 1
 
     """ Avem N care satisface constrangerile de aproximare """
     # Afisare date client pe grafic
     plt.scatter(x_stiut, y_stiut, marker='*', c='red', s=200, label='Date stiute')
-
 
     # Afisare grafic aprixomare
     plt.plot(x_domain, y_interp, c='b', linewidth=1, linestyle='-', label='Spline Cubica')
@@ -535,7 +619,7 @@ def ex3():
     plt.legend()
     plt.show()
 
-    #Grafic eroare
+    # Grafic eroare
     plt.figure(1)
     plt.plot(x_domain, eroare_trunchiere(y_interp,y_values), c='k', linewidth=2, label='Eroarea')
     plt.xlabel('x')
@@ -545,5 +629,6 @@ def ex3():
     plt.legend()
     plt.show()
 
-#Apel ex3
+
+# Apel ex3
 # ex3()
