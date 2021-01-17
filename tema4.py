@@ -104,13 +104,67 @@ def ex1():
 
 
 # Apel ex1
-ex1()
+# ex1()
 
 # ====================================================================================================
 # EX2
 # ====================================================================================================
+# functia data in cerinta
+def fex2(x):
+    sigm = 1.2
+    v1 = 1/(sigm * np.sqrt(2*np.pi))
+    putere = -(pow(x,2)/(2*pow(sigm,2)))
+    return v1*pow(np.e,putere)
 
 
+def integrare(f, X, metoda='dreptunghi'):
+    # dimensiunea vectorului trebuie sa fie impara
+    assert len(X)%2 == 1
+
+    # variabila in care vom calcula aproximarea
+    approx = 0
+    # distanta dintre doua pucnte(stim ca sunt echidistante
+    h = X[1] - X[0]
+
+    if metoda.lower() == 'dreptunghi':
+        # m este dimensiunea vectorului/2
+        m = int(len(X)/2)
+        for i in range(m):
+            approx += f(X[2*i])
+        approx *= 2*h
+    elif metoda.lower() == 'trapez':
+        approx=0
+    elif metoda.lower() == 'simpson':
+        approx=0
+    else:
+        raise ValueError("Metoda aleasa nu exista!")
+
+    return approx
 
 
+def ex2():
+    a = -12
+    b = 12
+    # calcul 'exact' al integrale
+    x = sp.symbols('x')
+    f = (1/(1.2 * sp.sqrt(2*sp.pi))) * sp.exp(-(pow(x, 2)/(2*pow(1.2, 2))))
+    adev = sp.integrate(f, (x, a, b)).evalf()
+    print("Aproximare folosind metoda interna sympy: " + str(adev))
+
+    # am ales N impar la intamplare, 31
+    N = 31
+    # X discret
+    x_discret = np.linspace(a, b, N)
+    # apel integrare pt dreptunghi
+    approx1 = integrare(fex2, x_discret)
+    print("Aproximare folosind metoda de cuadratura sumata a dreptunghiului: " + str(approx1))
+    # apel integrare pt trapez
+    approx1 = integrare(fex2, x_discret)
+    print("Aproximare folosind metoda de cuadratura sumata a trapezului: " + str(approx1))
+    # apel integrare pt Simpson
+    approx1 = integrare(fex2, x_discret)
+    print("Aproximare folosind metoda de cuadratura sumata Simpson: " + str(approx1))
+
+# Apel ex2
+ex2()
 
