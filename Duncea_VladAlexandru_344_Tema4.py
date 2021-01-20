@@ -44,7 +44,8 @@ def ex1():
     ddy = ddf(domeniu)
 
     # eroarea maxima dorita
-    err_dorit = 10 ** (-5)
+    err_dorit = 1e-5
+
     # eroarea maxima obtinuta (intial orice mai mare ca err dorita)
     err_max = err_dorit + 1
 
@@ -52,11 +53,11 @@ def ex1():
     N = 2
 
     while err_max > err_dorit:
-        # oprire in caz ca ajungem la un N prea mare
-        if N > 90:
-            raise AssertionError("Nu am reusit sa ajungem la gradul de aproximare dorit!")
         # Crestem N
         N += 1
+        # oprire in caz ca ajungem la un N prea mare
+        if N > 400:
+            raise AssertionError("Nu am reusit sa ajungem la gradul de aproximare dorit!")
         # constructie X discret
         x_discret = np.zeros(N+2)
         x_discret[1:-1] = np.linspace(interval[0], interval[1], N)
@@ -75,7 +76,7 @@ def ex1():
 
     # grafic derivata exacta/derivata noastra
     plt.figure(0)
-    plt.title("Aproximari N=" + str(N))
+    plt.title("Aproximare derivata a doua, N=" + str(N))
     plt.plot(domeniu, ddy, c='k', linewidth=2, label='derivata a doua exacta')
     plt.plot(x_discret[1:-1], ddf_dif[1:-1], c='orange', linewidth=2, linestyle='--', label='aproximata')
     plt.grid(True)
@@ -92,8 +93,8 @@ def ex1():
 
 
     plt.figure(1)
-    plt.title("Erori aproximare pentru N=" + str(N))
-    plt.plot(x_discret[1:-1], np.abs(ddf_ex_discret[1:-1] - ddf_dif[1:-1]), c='orange', linewidth=2, label='progresive')
+    plt.title("Erori aproximare a doua derivata, N=" + str(N))
+    plt.plot(x_discret[1:-1], np.abs(ddf_ex_discret[1:-1] - ddf_dif[1:-1]), c='orange', linewidth=2, label='eroare trunchiere')
     plt.grid(True)
     plt.axvline(0, c='black', linewidth=1)
     plt.axhline(0, c='black', linewidth=1)
@@ -118,9 +119,6 @@ def fex2(x):
 
 
 def integrare(f, X, metoda='dreptunghi'):
-    # dimensiunea vectorului trebuie sa fie impara
-    assert len(X)%2 == 1
-
     # variabila in care vom calcula aproximarea
     approx = 0
     # distanta dintre doua pucnte(stim ca sunt echidistante
@@ -133,9 +131,28 @@ def integrare(f, X, metoda='dreptunghi'):
             approx += f(X[2*i])
         approx *= 2*h
     elif metoda.lower() == 'trapez':
-        approx=0
+        # m este dimensiunea vectorului-1
+        m = int(len(X) - 1)
+        approx = X[0] + X[m]
+        for i in range(1, m):
+            approx += 2*f(X[i])
+        approx *= h/2
     elif metoda.lower() == 'simpson':
-        approx=0
+        # m este dimensiunea vectorului/2
+        m = int(len(X)/2)
+        approx = X[0] + X[2*m]
+
+        sum_part = 0
+        for i in range(0, m):
+            sum_part += f(X[2*i+1])
+        approx += 4 * sum_part
+
+        sum_part = 0
+        for i in range(1, m-1):
+            sum_part += f(X[2*i])
+        approx += 2 * sum_part
+
+        approx *= h/3
     else:
         raise ValueError("Metoda aleasa nu exista!")
 
@@ -151,19 +168,19 @@ def ex2():
     adev = sp.integrate(f, (x, a, b)).evalf()
     print("Aproximare folosind metoda interna sympy: " + str(adev))
 
-    # am ales N impar la intamplare, 31
-    N = 31
+    # am ales N impar la intamplare, 25
+    N = 41
     # X discret
     x_discret = np.linspace(a, b, N)
     # apel integrare pt dreptunghi
     approx1 = integrare(fex2, x_discret)
     print("Aproximare folosind metoda de cuadratura sumata a dreptunghiului: " + str(approx1))
     # apel integrare pt trapez
-    approx1 = integrare(fex2, x_discret)
-    print("Aproximare folosind metoda de cuadratura sumata a trapezului: " + str(approx1))
+    approx2 = integrare(fex2, x_discret, metoda='trapez')
+    print("Aproximare folosind metoda de cuadratura sumata a trapezului: " + str(approx2))
     # apel integrare pt Simpson
-    approx1 = integrare(fex2, x_discret)
-    print("Aproximare folosind metoda de cuadratura sumata Simpson: " + str(approx1))
+    approx3 = integrare(fex2, x_discret, metoda='Simpson')
+    print("Aproximare folosind metoda de cuadratura sumata Simpson: " + str(approx3))
 
 # Apel ex2
 ex2()
