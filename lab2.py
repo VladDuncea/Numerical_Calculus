@@ -6,10 +6,8 @@ import matplotlib.pyplot as plt
 def f(x):
     return np.cos(x) - x
 
-
 def df(x):
     return -np.sin(x) - 1
-
 
 a = 0
 b = np.pi / 2

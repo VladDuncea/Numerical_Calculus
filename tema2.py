@@ -433,4 +433,13 @@ def EX4():
     print(L)
 
 """ Apel ex4 """
-EX4()
+# EX4()
+
+A= np.array([[25,15,-5],
+            [15,18,0],
+            [-5,0,11]])
+
+# Ex1 b
+b = np.array([1, 2, 3])
+x = meg_pivot_total(A,b)
+print(x)
